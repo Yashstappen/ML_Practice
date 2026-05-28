@@ -69,7 +69,7 @@ lin_reg.fit(housing_prepared, housing_labels)
 lin_pred = lin_reg.predict(housing_prepared)
 lin_rmses = -cross_val_score(lin_reg, housing_prepared, housing_labels, cv=10, scoring="neg_root_mean_squared_error")
 # print(f"The rmse of Linear Regression is: {lin_rmse}")
-print(pd.Series(lin_rmses).describe())
+print(pd.Series(lin_rmses).describe())#mean-69204.322755
 
 #Decision Tree model
 dec_reg = DecisionTreeRegressor()
@@ -77,7 +77,7 @@ dec_reg.fit(housing_prepared, housing_labels)
 dec_pred = dec_reg.predict(housing_prepared)
 dec_rmses = -cross_val_score(dec_reg, housing_prepared, housing_labels, cv=10, scoring="neg_root_mean_squared_error") #Usually Higher is better, but in RMSE lower is better, hence we use -ve, -49>-60 but 49<60
 # print(f"The rmse of DecisionTreeRegressor is: {dec_rmses}")
-print(pd.Series(dec_rmses).describe())
+print(pd.Series(dec_rmses).describe())#mean-69097.008945
 
 #Random Forest Regressor model
 RFR_reg = RandomForestRegressor()
@@ -85,4 +85,6 @@ RFR_reg.fit(housing_prepared, housing_labels)
 RFR_pred = RFR_reg.predict(housing_prepared)
 RFR_rmses = -cross_val_score(RFR_reg, housing_prepared, housing_labels, cv=10, scoring="neg_root_mean_squared_error")
 # print(f"The rmse of RandomForestRegressor is: {RFR_rmse}")
-print(pd.Series(RFR_rmses).describe())
+print(pd.Series(RFR_rmses).describe())#mean-49467.057737
+
+#Hence we can go forward with the Random forest regressor 
