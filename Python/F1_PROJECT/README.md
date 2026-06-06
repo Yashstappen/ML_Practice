@@ -21,3 +21,11 @@ A predicted final championship position. A value close to 1.0 means the model ex
 - Python, Pandas, NumPy
 - scikit-learn (Linear Regression, Pipeline, StandardScaler, SimpleImputer)
 - Joblib for model persistence
+
+## About the API
+- Discovering OpenF1's API and Accessing Live Data
+- Pulls the 2025 F1 mid-season Constructors data
+- Tested completely blind on the model
+
+## Results
+- The RMSE value returned : 1.34 when compared to the 2025 season results
