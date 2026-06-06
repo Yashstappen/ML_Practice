@@ -2,7 +2,9 @@ import os
 import pandas as pd
 import numpy as np
 import joblib
- 
+from urllib.request import urlopen
+import json
+
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -11,6 +13,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import RandomForestRegressor
 
 
 MODEL_FILE = "model.pkl"
@@ -22,6 +25,11 @@ def build_pipeline(num_attr):
         ("scaler", StandardScaler())
     ])
     return pipeline
+
+response = urlopen("https://api.openf1.org/v1/championship_teams?session_key=9947")
+data = json.load(response)
+df = pd.DataFrame(data)
+
 if not os.path.exists(MODEL_FILE):
 
     # 1. Loading the dataset
@@ -57,11 +65,11 @@ if not os.path.exists(MODEL_FILE):
     clean_data = pipeline.fit_transform(features)
 
     # 7. training the model
-    linear_model = LinearRegression()
-    linear_model.fit(clean_data, labels)
+    model = LinearRegression()
+    model.fit(clean_data, labels)
     
     # 8. Saving the model and pipeline
-    joblib.dump(linear_model, MODEL_FILE)
+    joblib.dump(model, MODEL_FILE)
     joblib.dump(pipeline, PIPELINE_FILE)
     print("Model trained and saved.")
 
@@ -69,12 +77,38 @@ else:
     model = joblib.load(MODEL_FILE)
     pipeline = joblib.load(PIPELINE_FILE)
     
-    data = pd.read_csv("input.csv")
-    data = data.drop("position_y", axis=1)
-    # data = pd.DataFrame([{"points_x": 25, "position_x": 1, "wins_x": 1, "round_x": 10}])
-    clean_data = pipeline.transform(data)
+    prediction_df = pd.DataFrame({
+        "points_x":df["points_current"],
+        "position_x":df["position_current"],
+        "wins_x": 0,
+        "round_x": 12
+    })
 
+    clean_data = pipeline.transform(prediction_df)
+
+    results = pd.DataFrame({
+        "team" : df["team_name"],
+        "predicted_position":model.predict(clean_data)
+    })
+    results["predicted_position"] = results["predicted_position"].round(2)
     predictions = model.predict(clean_data)
-    results = data.copy()
-    results["predicted_position"] = predictions
-    print(results.head())
+    # print(results.sort_values("predicted_position"))
+
+    actual_2025 = {
+    "McLaren": 1,
+    "Mercedes": 2,
+    "Red Bull Racing": 3,
+    "Ferrari": 4,
+    "Williams": 5,
+    "Racing Bulls": 6,
+    "Aston Martin": 7,
+    "Haas F1 Team": 8,
+    "Kick Sauber": 9,
+    "Alpine": 10
+    }
+    
+    results["actual_position"] = results["team"].map(actual_2025)
+    print(results.sort_values("predicted_position"))
+
+    rmse = root_mean_squared_error(results["actual_position"], results["predicted_position"])
+    print("\nRMSE:", rmse)
