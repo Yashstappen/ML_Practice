@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import cross_val_score
-from sklearn.ensemble import RandomForestRegressor
+import matplotlib.pyplot as plt
 
 
 MODEL_FILE = "model.pkl"
@@ -108,7 +108,21 @@ else:
     }
     
     results["actual_position"] = results["team"].map(actual_2025)
-    print(results.sort_values("predicted_position"))
+    # print(results.sort_values("predicted_position"))
 
-    rmse = root_mean_squared_error(results["actual_position"], results["predicted_position"])
-    print("\nRMSE:", rmse)
+    # rmse = root_mean_squared_error(results["actual_position"], results["predicted_position"])
+    # print("\nRMSE:", rmse)
+
+x = np.arange(len(results["actual_position"]))
+width = 0.4
+
+plt.style.use("dark_background")
+plt.figure(figsize=(10, 6))
+plt.barh(x-width/2, results["actual_position"], height=width, label="Actual Position", color="red")
+plt.barh(x+width/2, results["predicted_position"], height=width, label="Predicted Position", color="white")
+plt.yticks(x, results["team"])
+plt.xlabel("Position")
+plt.ylabel("Teams")
+plt.title("F1 Constructor Standings Prediction")
+plt.legend()
+plt.show()
